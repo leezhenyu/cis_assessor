@@ -1,0 +1,21 @@
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Assessment output
+output/
+downloaded_report/
+sample_report/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Extracted text (regenerable)
+extracted.txt
