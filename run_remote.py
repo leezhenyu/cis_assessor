@@ -1,7 +1,8 @@
+import os
+import sys
+
 import paramiko
 from scp import SCPClient
-import os
-import time
 
 HOST = "192.168.1.30"
 USER = "eric"
@@ -10,8 +11,28 @@ REMOTE_DIR = "cis_assessor_deploy"
 
 print("Connecting to %s..." % HOST)
 ssh = paramiko.SSHClient()
-ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect(HOST, port=22, username=USER, password=PASS)
+
+# Security: load the system + user known_hosts files so only verified
+# host keys are accepted. RejectPolicy (the default) will raise
+# paramiko.ssh_exception.SSHException if the host key is unknown or
+# has changed, preventing man-in-the-middle attacks.
+# To add a new host: ssh-keyscan 192.168.1.30 >> ~/.ssh/known_hosts
+ssh.load_system_host_keys()          # /etc/ssh/ssh_known_hosts
+ssh.load_host_keys(                  # ~/.ssh/known_hosts
+    os.path.expanduser("~/.ssh/known_hosts")
+)
+ssh.set_missing_host_key_policy(paramiko.RejectPolicy())
+
+try:
+    ssh.connect(HOST, port=22, username=USER, password=PASS)
+except paramiko.ssh_exception.SSHException as e:
+    print(
+        f"ERROR: Could not verify host key for {HOST}.\n"
+        f"If this is a trusted host, add its key first:\n"
+        f"  ssh-keyscan {HOST} >> ~/.ssh/known_hosts\n"
+        f"Details: {e}"
+    )
+    sys.exit(1)
 
 print("Uploading cis_assessor...")
 with SCPClient(ssh.get_transport()) as scp:
