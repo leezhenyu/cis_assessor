@@ -1,0 +1,35 @@
+================================================================================
+CIS Oracle Linux 9 Benchmark v2.0.0
+Rule ID   : 1.3.1.1
+Title     : Ensure SELinux is installed
+Type      : Automated
+Profiles  : Level 1 - Server, Level 1 - Workstation
+Date/Time : 2026-04-01T00:11:41.290201+08:00
+Status    : ✅ PASS
+Duration  : 4ms
+================================================================================
+
+--- DESCRIPTION ---
+SELinux provides Mandatory Access Control.
+
+--- EVALUATION ---
+Strategy  : package_check
+Reasoning : Package is installed: --- rpm -q libselinux ---
+/var/folders/d2/ctj12pkn1qzdjhllwy9kkg4h0000gn/T/cis_audit_jljzih4k.sh: li
+
+--- AUDIT PROCEDURE ---
+Verify SELinux is installed. 
+Run the following command: 
+# rpm -q libselinux 
+libselinux-<version>
+
+--- STDOUT ---
+--- rpm -q libselinux ---
+/var/folders/d2/ctj12pkn1qzdjhllwy9kkg4h0000gn/T/cis_audit_jljzih4k.sh: line 5: rpm: command not found
+
+
+
+--- EXIT CODE ---
+0
+
+================================================================================

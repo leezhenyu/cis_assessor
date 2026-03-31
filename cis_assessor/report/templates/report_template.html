@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS Assessment Report — {{ report.system.hostname }}</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232736;
+    --border: #2e3347;
+    --text: #e2e8f0;
+    --text-muted: #8892a4;
+    --accent: #4f8ef7;
+    --pass: #22c55e;
+    --fail: #ef4444;
+    --manual: #f59e0b;
+    --error: #a855f7;
+    --skip: #64748b;
+    --radius: 10px;
+    --font: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 32px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+  .header-top { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+  .header-icon { font-size: 32px; }
+  .header h1 { font-size: 22px; font-weight: 700; color: var(--text); }
+  .header h1 span { color: var(--accent); }
+  .header-meta {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    color: var(--text-muted); font-size: 13px;
+  }
+  .header-meta span strong { color: var(--text); }
+
+  /* ── Layout ── */
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px 40px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .card-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  /* ── Score Card ── */
+  .score-card {
+    background: linear-gradient(135deg, var(--surface) 0%, #1e2235 100%);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 28px;
+    display: flex; align-items: center; gap: 28px;
+  }
+  .score-circle {
+    width: 120px; height: 120px; flex-shrink: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      var(--pass) 0% calc({{ report.summary.score_percent }}%),
+      var(--surface2) calc({{ report.summary.score_percent }}%) 100%
+    );
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .score-circle::after {
+    content:''; position:absolute; width:84px; height:84px;
+    background:var(--surface); border-radius:50%;
+  }
+  .score-num {
+    position: relative; z-index: 1;
+    font-size: 26px; font-weight: 700; color: var(--text);
+    text-align: center; line-height: 1;
+  }
+  .score-num small { display: block; font-size: 11px; color: var(--text-muted); font-weight: 400; }
+  .score-label { font-size: 32px; font-weight: 800; color: var(--pass); }
+  .score-desc { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+
+  /* ── Stat Cards ── */
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-card .stat-num {
+    font-size: 36px; font-weight: 800; margin-bottom: 4px;
+  }
+  .stat-card .stat-label {
+    font-size: 12px; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 1px; font-weight: 500;
+  }
+  .stat-pass .stat-num { color: var(--pass); }
+  .stat-fail .stat-num { color: var(--fail); }
+  .stat-manual .stat-num { color: var(--manual); }
+  .stat-error .stat-num { color: var(--error); }
+
+  /* ── Host Info Table ── */
+  .info-table { width: 100%; border-collapse: collapse; }
+  .info-table td { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .info-table td:first-child {
+    color: var(--text-muted); font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    font-weight: 500; width: 140px;
+  }
+  .info-table tr:last-child td { border-bottom: none; }
+
+  /* ── Section Bars ── */
+  .section-list { display: flex; flex-direction: column; gap: 10px; }
+  .section-row { }
+  .section-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 4px;
+  }
+  .section-name { font-size: 13px; font-weight: 500; }
+  .section-pct { font-size: 12px; color: var(--text-muted); }
+  .section-bar {
+    height: 8px; background: var(--surface2);
+    border-radius: 4px; overflow: hidden;
+  }
+  .section-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--pass));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  /* ── Results Table ── */
+  .section-heading {
+    font-size: 18px; font-weight: 700; margin: 36px 0 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-heading::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-bar input[type=text] {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px; padding: 8px 14px;
+    font-size: 13px; outline: none; flex: 1; min-width: 200px;
+  }
+  .filter-bar input[type=text]:focus { border-color: var(--accent); }
+  .filter-btn {
+    background: var(--surface2); color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 14px; cursor: pointer; font-size: 13px;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .results-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .results-table th {
+    text-align: left; padding: 10px 14px;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-muted); font-weight: 600;
+    border-bottom: 2px solid var(--border);
+    position: sticky; top: 80px; background: var(--bg);
+  }
+  .results-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .results-table tr:hover { background: var(--surface); cursor: pointer; }
+  .col-id { width: 70px; font-family: var(--mono); font-weight: 600; color: var(--accent); }
+  .col-status { width: 90px; }
+  .col-type { width: 100px; }
+  .col-section { width: 80px; font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+  /* Badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+  }
+  .badge-pass    { background: rgba(34, 197, 94, 0.15); color: var(--pass); border: 1px solid rgba(34,197,94,0.3); }
+  .badge-fail    { background: rgba(239, 68, 68, 0.15); color: var(--fail); border: 1px solid rgba(239,68,68,0.3); }
+  .badge-manual  { background: rgba(245,158,11,0.15);  color: var(--manual); border: 1px solid rgba(245,158,11,0.3); }
+  .badge-error   { background: rgba(168,85,247,0.15);  color: var(--error); border: 1px solid rgba(168,85,247,0.3); }
+  .badge-skip    { background: rgba(100,116,139,0.15); color: var(--skip); border: 1px solid rgba(100,116,139,0.3); }
+  .badge-auto    { background: rgba(79,142,247,0.1); color: var(--accent); }
+  .badge-manual2 { background: rgba(245,158,11,0.1); color: var(--manual); }
+
+  /* ── Detail Panel (accordion) ── */
+  .rule-detail {
+    display: none;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .rule-detail.open { display: table-row; }
+  .rule-detail td { padding: 16px 20px 20px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .detail-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
+  .detail-box h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
+  .detail-box pre {
+    font-family: var(--mono); font-size: 12px; color: var(--text);
+    white-space: pre-wrap; word-break: break-all; max-height: 300px;
+    overflow-y: auto; line-height: 1.5;
+  }
+  .detail-box .reason { font-size: 13px; color: var(--text); }
+  .verdict-pass { color: var(--pass); }
+  .verdict-fail { color: var(--fail); }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 60px; padding: 24px 40px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted); font-size: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .grid-2, .grid-4, .detail-grid { grid-template-columns: 1fr; }
+    .container { padding: 20px; }
+    .header { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══════════════════════════════════════════════════════════════ -->
+<div class="header">
+  <div class="header-top">
+    <span class="header-icon">🔒</span>
+    <h1><span>CIS</span> Oracle Linux 9 Benchmark — Assessment Report</h1>
+  </div>
+  <div class="header-meta">
+    <span><strong>Profile:</strong> {{ report.profile }}</span>
+    <span><strong>Benchmark:</strong> {{ report.benchmark_name }} {{ report.benchmark_version }}</span>
+    <span><strong>Date:</strong> {{ report.assessment_date[:19] | replace("T", " ") }}</span>
+    <span><strong>Host:</strong> {{ report.system.hostname }}</span>
+    <span><strong>Assessor:</strong> v{{ report.assessor_version }}</span>
+  </div>
+</div>
+
+<!-- ═══ CONTENT ══════════════════════════════════════════════════════════════ -->
+<div class="container">
+
+  <!-- ── Summary Row ─────────────────────────────────────────────── -->
+  <div class="section-heading">📊 Executive Summary</div>
+
+  <div class="score-card" style="margin-bottom:20px">
+    <div class="score-circle">
+      <div class="score-num">
+        {{ report.summary.score_percent }}<small>%</small>
+      </div>
+    </div>
+    <div>
+      <div class="score-label">
+        {% if report.summary.score_percent >= 85 %}Compliant
+        {% elif report.summary.score_percent >= 60 %}Partial
+        {% else %}Non-Compliant{% endif %}
+      </div>
+      <div class="score-desc">
+        {{ report.summary.passed }} passed out of
+        {{ report.summary.passed + report.summary.failed }} automated checks
+        ({{ report.summary.manual }} manual, {{ report.summary.errors }} errors excluded from score)
+      </div>
+      <div class="score-desc" style="margin-top:8px">
+        ⏱ Duration: {{ "%.1f"|format(report.assessment_duration_s) }}s &nbsp;|&nbsp;
+        👤 Run by: {{ report.system.run_as_user }}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:24px">
+    <div class="stat-card stat-pass">
+      <div class="stat-num">{{ report.summary.passed }}</div>
+      <div class="stat-label">✅ Pass</div>
+    </div>
+    <div class="stat-card stat-fail">
+      <div class="stat-num">{{ report.summary.failed }}</div>
+      <div class="stat-label">❌ Fail</div>
+    </div>
+    <div class="stat-card stat-manual">
+      <div class="stat-num">{{ report.summary.manual }}</div>
+      <div class="stat-label">📋 Manual</div>
+    </div>
+    <div class="stat-card stat-error">
+      <div class="stat-num">{{ report.summary.errors }}</div>
+      <div class="stat-label">⚠️ Error</div>
+    </div>
+  </div>
+
+  <!-- ── Host Info + Section Breakdown ───────────────────────────── -->
+  <div class="grid-2" style="margin-bottom:32px">
+
+    <div class="card">
+      <div class="card-title">🖥 Host Information</div>
+      <table class="info-table">
+        <tr><td>Hostname</td><td>{{ report.system.hostname }}</td></tr>
+        <tr><td>IP Address</td><td>{{ report.system.ip_addresses | join(', ') }}</td></tr>
+        <tr><td>OS</td><td>{{ report.system.os_name }}</td></tr>
+        <tr><td>Kernel</td><td>{{ report.system.kernel_version }}</td></tr>
+        <tr><td>Architecture</td><td>{{ report.system.architecture }}</td></tr>
+        <tr><td>SELinux</td><td>{{ report.system.selinux_status }}</td></tr>
+        <tr><td>Run As</td><td>{{ report.system.run_as_user }}</td></tr>
+        <tr><td>Uptime</td><td>{{ report.system.uptime }}</td></tr>
+        <tr><td>Profile</td><td>{{ report.profile }}</td></tr>
+        <tr><td>Assessed</td><td>{{ report.assessment_date[:19] | replace("T"," ") }}</td></tr>
+        <tr><td>Completed</td><td>{{ report.assessment_end[:19] | replace("T"," ") }}</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📂 Section Breakdown</div>
+      <div class="section-list">
+        {% set section_labels = {
+          "1": "1 — Initial Setup",
+          "2": "2 — Services",
+          "3": "3 — Network Configuration",
+          "4": "4 — Host-Based Firewall",
+          "5": "5 — Access Control",
+          "6": "6 — Logging & Auditing",
+          "7": "7 — System Maintenance"
+        } %}
+        {% for top_sec in ["1","2","3","4","5","6","7"] %}
+          {% set pass_count = namespace(val=0) %}
+          {% set total_count = namespace(val=0) %}
+          {% for r in report.results %}
+            {% if r.rule_id.startswith(top_sec + ".") or r.rule_id == top_sec %}
+              {% if r.status in ["PASS","FAIL"] %}
+                {% set total_count.val = total_count.val + 1 %}
+                {% if r.status == "PASS" %}
+                  {% set pass_count.val = pass_count.val + 1 %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if total_count.val > 0 %}
+            {% set pct = (pass_count.val / total_count.val * 100) | round(0) | int %}
+            <div class="section-row">
+              <div class="section-header">
+                <span class="section-name">{{ section_labels.get(top_sec, "Section " + top_sec) }}</span>
+                <span class="section-pct">{{ pass_count.val }}/{{ total_count.val }} ({{ pct }}%)</span>
+              </div>
+              <div class="section-bar">
+                <div class="section-bar-fill" style="width:{{ pct }}%"></div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Results Table ─────────────────────────────────────────────── -->
+  <div class="section-heading">📋 Detailed Results</div>
+
+  <div class="filter-bar">
+    <input type="text" id="search" placeholder="🔍  Search rules..." oninput="filterTable()">
+    <button class="filter-btn active" onclick="filterStatus('ALL', this)">All ({{ report.summary.total }})</button>
+    <button class="filter-btn" onclick="filterStatus('PASS', this)">Pass ({{ report.summary.passed }})</button>
+    <button class="filter-btn" onclick="filterStatus('FAIL', this)">Fail ({{ report.summary.failed }})</button>
+    <button class="filter-btn" onclick="filterStatus('MANUAL', this)">Manual ({{ report.summary.manual }})</button>
+    <button class="filter-btn" onclick="filterStatus('ERROR', this)">Error ({{ report.summary.errors }})</button>
+  </div>
+
+  <table class="results-table" id="resultsTable">
+    <thead>
+      <tr>
+        <th class="col-id">Rule ID</th>
+        <th>Title</th>
+        <th class="col-section">Section</th>
+        <th class="col-status">Status</th>
+        <th class="col-type">Type</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in report.results %}
+      <tr class="result-row" data-status="{{ r.status }}"
+          onclick="toggleDetail('detail-{{ r.rule_id | replace('.','_') }}')">
+        <td class="col-id">{{ r.rule_id }}</td>
+        <td>{{ r.rule_title }}</td>
+        <td class="col-section">{{ r.rule_section }}</td>
+        <td class="col-status">
+          {% if r.status == "PASS" %}
+            <span class="badge badge-pass">✅ PASS</span>
+          {% elif r.status == "FAIL" %}
+            <span class="badge badge-fail">❌ FAIL</span>
+          {% elif r.status == "MANUAL" %}
+            <span class="badge badge-manual">📋 MANUAL</span>
+          {% elif r.status == "ERROR" %}
+            <span class="badge badge-error">⚠️ ERROR</span>
+          {% else %}
+            <span class="badge badge-skip">⏭ SKIP</span>
+          {% endif %}
+        </td>
+        <td class="col-type">
+          {% if r.assessment_type == "Automated" %}
+            <span class="badge badge-auto">Auto</span>
+          {% else %}
+            <span class="badge badge-manual2">Manual</span>
+          {% endif %}
+        </td>
+        <td>{{ r.duration_ms }}ms</td>
+      </tr>
+      <tr class="rule-detail" id="detail-{{ r.rule_id | replace('.','_') }}">
+        <td colspan="6">
+          <div class="detail-grid">
+            <div class="detail-box">
+              <h4>📊 Evaluation</h4>
+              <p class="reason">
+                <strong>Strategy:</strong> {{ r.evaluation_strategy }}<br>
+                <strong>Result:</strong>
+                <span class="{% if r.status == 'PASS' %}verdict-pass{% elif r.status == 'FAIL' %}verdict-fail{% endif %}">
+                  {{ r.status }}
+                </span><br>
+                <strong>Reason:</strong> {{ r.evaluation_reason }}
+              </p>
+              {% if r.execution_error %}
+              <p style="color:var(--error);margin-top:8px">⚠️ {{ r.execution_error }}</p>
+              {% endif %}
+            </div>
+            <div class="detail-box">
+              <h4>📁 Evidence  ·  exit code: {{ r.exit_code }}{% if r.timed_out %} · ⚠️ TIMED OUT{% endif %}</h4>
+              <pre>{{ r.raw_stdout[:1000] if r.raw_stdout else "(no output)" }}{% if r.raw_stdout|length > 1000 %}
+... (truncated, see evidence file){% endif %}</pre>
+              {% if r.raw_stderr and r.raw_stderr.strip() %}
+              <h4 style="margin-top:10px">STDERR</h4>
+              <pre style="color:var(--error)">{{ r.raw_stderr[:500] }}</pre>
+              {% endif %}
+            </div>
+          </div>
+          {% if r.evidence_path %}
+          <p style="margin-top:8px;font-size:12px;color:var(--text-muted)">
+            📂 Evidence file: <code>{{ r.evidence_path }}</code>
+          </p>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+
+<!-- ═══ FOOTER ══════════════════════════════════════════════════════════════ -->
+<div class="footer">
+  <div>
+    Generated by <strong>CIS Oracle Linux 9 Assessor v{{ report.assessor_version }}</strong> ·
+    Duration: {{ "%.1f"|format(report.assessment_duration_s) }}s ·
+    Total rules: {{ report.summary.total }}
+  </div>
+  <div>
+    ⚠️ This report is for informational purposes. Results require expert review.
+  </div>
+</div>
+
+<script>
+  let activeStatus = 'ALL';
+
+  function toggleDetail(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('open');
+  }
+
+  function filterTable() {
+    const query = document.getElementById('search').value.toLowerCase();
+    const rows = document.querySelectorAll('.result-row');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const statusMatch = activeStatus === 'ALL' || row.dataset.status === activeStatus;
+      const textMatch = !query || text.includes(query);
+      const detailRow = document.getElementById('detail-' + row.querySelector('.col-id').textContent.trim().replace(/\./g, '_'));
+      const show = statusMatch && textMatch;
+      row.style.display = show ? '' : 'none';
+      if (detailRow) detailRow.style.display = show ? '' : 'none';
+    });
+  }
+
+  function filterStatus(status, btn) {
+    activeStatus = status;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterTable();
+  }
+</script>
+</body>
+</html>

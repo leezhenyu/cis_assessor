@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-04-01T00:11:41.294568+08:00",
+  "total": 5,
+  "rules": [
+    {
+      "rule_id": "1.1.1.1",
+      "title": "Ensure cramfs kernel module is not available",
+      "status": "PASS",
+      "evidence_file": "/tmp/cis_test/Erics-Mac-mini.local_2026-04-01_00-11-41/evidence/1.1.1.1.txt",
+      "timestamp": "2026-04-01T00:11:41.263382+08:00"
+    },
+    {
+      "rule_id": "1.1.1.2",
+      "title": "Ensure freevxfs kernel module is not available",
+      "status": "PASS",
+      "evidence_file": "/tmp/cis_test/Erics-Mac-mini.local_2026-04-01_00-11-41/evidence/1.1.1.2.txt",
+      "timestamp": "2026-04-01T00:11:41.273639+08:00"
+    },
+    {
+      "rule_id": "1.1.2.1.1",
+      "title": "Ensure /tmp is a separate partition",
+      "status": "PASS",
+      "evidence_file": "/tmp/cis_test/Erics-Mac-mini.local_2026-04-01_00-11-41/evidence/1.1.2.1.1.txt",
+      "timestamp": "2026-04-01T00:11:41.280601+08:00"
+    },
+    {
+      "rule_id": "1.2.1.1",
+      "title": "Ensure GPG keys are configured",
+      "status": "MANUAL",
+      "evidence_file": "/tmp/cis_test/Erics-Mac-mini.local_2026-04-01_00-11-41/evidence/1.2.1.1.txt",
+      "timestamp": "2026-04-01T00:11:41.286176+08:00"
+    },
+    {
+      "rule_id": "1.3.1.1",
+      "title": "Ensure SELinux is installed",
+      "status": "PASS",
+      "evidence_file": "/tmp/cis_test/Erics-Mac-mini.local_2026-04-01_00-11-41/evidence/1.3.1.1.txt",
+      "timestamp": "2026-04-01T00:11:41.290201+08:00"
+    }
+  ]
+}

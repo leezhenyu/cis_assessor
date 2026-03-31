@@ -1,0 +1,80 @@
+================================================================================
+CIS Oracle Linux 9 Benchmark v2.0.0
+Rule ID   : 1.2.1.1
+Title     : Ensure GPG keys are configured
+Type      : Manual
+Profiles  : Level 1 - Server, Level 1 - Workstation
+Date/Time : 2026-04-01T00:11:41.286176+08:00
+Status    : 📋 MANUAL
+Duration  : 3ms
+================================================================================
+
+--- DESCRIPTION ---
+The RPM Package Manager implements GPG key signing to verify package integrity 
+during and after installation.
+
+--- EVALUATION ---
+Strategy  : manual
+Reasoning : Manual review required — automated assessment not possible
+
+--- AUDIT PROCEDURE ---
+List all GPG key URLs 
+Each repository should have a gpgkey with a URL pointing to the location of the GPG 
+key, either local or remote. 
+# grep -r gpgkey /etc/yum.repos.d/* /etc/dnf/dnf.conf 
+List installed GPG keys 
+Run the following command to list the currently installed keys. These are the active keys 
+used for verification and installation of RPMs. The packages are fake, they are 
+generated on the fly by dnf or rpm during the import of keys from the URL specified in 
+the repository configuration. 
+Example: 
+# for RPM_PACKAGE in $(rpm -q gpg-pubkey); do 
+echo "RPM: ${RPM_PACKAGE}" 
+RPM_SUMMARY=$(rpm -q --queryformat "%{SUMMARY}" "${RPM_PACKAGE}") 
+RPM_PACKAGER=$(rpm -q --queryformat "%{PACKAGER}" "${RPM_PACKAGE}") 
+RPM_DATE=$(date +%Y-%m-%d -d "1970-1-1+$((0x$(rpm -q --queryformat "%{RELEASE}" "${RPM_PACKAGE}") ))sec") 
+RPM_KEY_ID=$(rpm -q --queryformat "%{VERSION}" "${RPM_PACKAGE}") 
+echo "Packager: ${RPM_PACKAGER} 
+Summary: ${RPM_SUMMARY} 
+Creation date: ${RPM_DATE} 
+Key ID: ${RPM_KEY_ID} 
+" 
+done 
+RPM: gpg-pubkey-9db62fb1-59920156 
+Packager: Fedora 28 (28) <fedora-28@fedoraproject.org> 
+Summary: gpg(Fedora 28 (28) <fedora-28@fedoraproject.org>) 
+Creation date: 2017-08-14 
+Key ID: 9db62fb1 
+RPM: gpg-pubkey-09eab3f2-595fbba3 
+Packager: RPM Fusion free repository for Fedora (28) <rpmfusion-buildsys@lists.rpmfusion.org> 
+Summary: gpg(RPM Fusion free repository for Fedora (28) <rpmfusion-buildsys@lists.rpmfusion.org>) 
+Creation date: 2017-07-07 
+Key ID: 09eab3f2 
+The format of the package (gpg-pubkey-9db62fb1-59920156) is important to 
+understand for verification. Using the above example, it consists of three parts: 
+1. The general prefix name for all imported GPG keys: gpg-pubkey- 
+2. The version, which is the GPG key ID: 9db62fb1 
+3. The release is the date of the key in UNIX timestamp in hexadecimal: 59920156 
+With both the date and the GPG key ID, check the relevant repositories public key page 
+to confirm that the keys are indeed correct. 
+Query locally available GPG keys 
+Repositories that store their respective GPG keys on disk should do so in 
+/etc/pki/rpm-gpg/. These keys are available for immediate import either when dnf is 
+asked to install a relevant package from the repository or when an administrator imports 
+the key directly with the rpm --import command. 
+To find where these keys come from run: 
+# for PACKAGE in $(find /etc/pki/rpm-gpg/ -type f -exec rpm -qf {} \; | sort -u); do rpm -q --queryformat 
+"%{NAME}-%{VERSION} %{PACKAGER} %{SUMMARY}\\n" "${PACKAGE}"; done
+
+--- STDOUT ---
+(no output)
+
+--- STDERR ---
+/var/folders/d2/ctj12pkn1qzdjhllwy9kkg4h0000gn/T/cis_audit_ez5r4ad8.sh: line 13: syntax error near unexpected token `}'
+/var/folders/d2/ctj12pkn1qzdjhllwy9kkg4h0000gn/T/cis_audit_ez5r4ad8.sh: line 13: `}'
+
+
+--- EXIT CODE ---
+2
+
+================================================================================

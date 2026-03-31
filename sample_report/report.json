@@ -1,0 +1,141 @@
+{
+  "metadata": {
+    "tool": "CIS Oracle Linux 9 Assessor",
+    "tool_version": "1.0.0",
+    "benchmark": "CIS Oracle Linux 9 Benchmark",
+    "benchmark_version": "v2.0.0",
+    "profile": "Level 1 - Server",
+    "assessment_date": "2026-04-01T00:11:41.262627+08:00",
+    "assessment_end": "2026-04-01T00:11:41.294523+08:00",
+    "duration_seconds": 0.03
+  },
+  "host": {
+    "hostname": "Erics-Mac-mini.local",
+    "ip_addresses": [
+      "127.0.0.1"
+    ],
+    "os_name": "Darwin",
+    "os_version": "unknown",
+    "kernel_version": "25.4.0",
+    "architecture": "arm64",
+    "selinux_status": "not available",
+    "run_as_user": "eric",
+    "uptime": "0:11  up 5 days, 22:55, 1 user, load averages: 3.97 4.13 4.12"
+  },
+  "summary": {
+    "total": 5,
+    "passed": 4,
+    "failed": 0,
+    "manual": 1,
+    "errors": 0,
+    "skipped": 0,
+    "score_percent": 100.0
+  },
+  "results": [
+    {
+      "rule_id": "1.1.1.1",
+      "rule_title": "Ensure cramfs kernel module is not available",
+      "rule_section": "1.1.1",
+      "assessment_type": "Automated",
+      "profiles": [
+        "Level 1 - Server",
+        "Level 1 - Workstation"
+      ],
+      "status": "PASS",
+      "evaluation_strategy": "script_verdict",
+      "evaluation_reason": "Audit script explicitly reported PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "execution_error": null,
+      "evidence_path": "/tmp/cis_test/Erics-Mac-mini.local_2026-04-01_00-11-41/evidence/1.1.1.1.txt",
+      "duration_ms": 9,
+      "timestamp": "2026-04-01T00:11:41.263382+08:00",
+      "raw_stdout": "\n- Audit Result:\n  ** PASS **\n",
+      "raw_stderr": ""
+    },
+    {
+      "rule_id": "1.1.1.2",
+      "rule_title": "Ensure freevxfs kernel module is not available",
+      "rule_section": "1.1.1",
+      "assessment_type": "Automated",
+      "profiles": [
+        "Level 1 - Server",
+        "Level 1 - Workstation"
+      ],
+      "status": "PASS",
+      "evaluation_strategy": "script_verdict",
+      "evaluation_reason": "Audit script explicitly reported PASS",
+      "exit_code": 0,
+      "timed_out": false,
+      "execution_error": null,
+      "evidence_path": "/tmp/cis_test/Erics-Mac-mini.local_2026-04-01_00-11-41/evidence/1.1.1.2.txt",
+      "duration_ms": 6,
+      "timestamp": "2026-04-01T00:11:41.273639+08:00",
+      "raw_stdout": "\n- Audit Result:\n  ** PASS **\n",
+      "raw_stderr": ""
+    },
+    {
+      "rule_id": "1.1.2.1.1",
+      "rule_title": "Ensure /tmp is a separate partition",
+      "rule_section": "1.1.2.1",
+      "assessment_type": "Automated",
+      "profiles": [
+        "Level 1 - Server",
+        "Level 1 - Workstation"
+      ],
+      "status": "PASS",
+      "evaluation_strategy": "exit_code",
+      "evaluation_reason": "Audit script exited with code 0 (success)",
+      "exit_code": 0,
+      "timed_out": false,
+      "execution_error": null,
+      "evidence_path": "/tmp/cis_test/Erics-Mac-mini.local_2026-04-01_00-11-41/evidence/1.1.2.1.1.txt",
+      "duration_ms": 5,
+      "timestamp": "2026-04-01T00:11:41.280601+08:00",
+      "raw_stdout": "--- findmnt -kn /tmp ---\n/var/folders/d2/ctj12pkn1qzdjhllwy9kkg4h0000gn/T/cis_audit_9wdxbe46.sh: line 5: findmnt: command not found\n\n--- systemctl is-enabled tmp.mount ---\n/var/folders/d2/ctj12pkn1qzdjhllwy9kkg4h0000gn/T/cis_audit_9wdxbe46.sh: line 8: systemctl: command not found\n\n",
+      "raw_stderr": ""
+    },
+    {
+      "rule_id": "1.2.1.1",
+      "rule_title": "Ensure GPG keys are configured",
+      "rule_section": "1.2.1",
+      "assessment_type": "Manual",
+      "profiles": [
+        "Level 1 - Server",
+        "Level 1 - Workstation"
+      ],
+      "status": "MANUAL",
+      "evaluation_strategy": "manual",
+      "evaluation_reason": "Manual review required — automated assessment not possible",
+      "exit_code": 2,
+      "timed_out": false,
+      "execution_error": null,
+      "evidence_path": "/tmp/cis_test/Erics-Mac-mini.local_2026-04-01_00-11-41/evidence/1.2.1.1.txt",
+      "duration_ms": 3,
+      "timestamp": "2026-04-01T00:11:41.286176+08:00",
+      "raw_stdout": "",
+      "raw_stderr": "/var/folders/d2/ctj12pkn1qzdjhllwy9kkg4h0000gn/T/cis_audit_ez5r4ad8.sh: line 13: syntax error near unexpected token `}'\n/var/folders/d2/ctj12pkn1qzdjhllwy9kkg4h0000gn/T/cis_audit_ez5r4ad8.sh: line 13: `}'\n"
+    },
+    {
+      "rule_id": "1.3.1.1",
+      "rule_title": "Ensure SELinux is installed",
+      "rule_section": "1.3.1",
+      "assessment_type": "Automated",
+      "profiles": [
+        "Level 1 - Server",
+        "Level 1 - Workstation"
+      ],
+      "status": "PASS",
+      "evaluation_strategy": "package_check",
+      "evaluation_reason": "Package is installed: --- rpm -q libselinux ---\n/var/folders/d2/ctj12pkn1qzdjhllwy9kkg4h0000gn/T/cis_audit_jljzih4k.sh: li",
+      "exit_code": 0,
+      "timed_out": false,
+      "execution_error": null,
+      "evidence_path": "/tmp/cis_test/Erics-Mac-mini.local_2026-04-01_00-11-41/evidence/1.3.1.1.txt",
+      "duration_ms": 4,
+      "timestamp": "2026-04-01T00:11:41.290201+08:00",
+      "raw_stdout": "--- rpm -q libselinux ---\n/var/folders/d2/ctj12pkn1qzdjhllwy9kkg4h0000gn/T/cis_audit_jljzih4k.sh: line 5: rpm: command not found\n\n",
+      "raw_stderr": ""
+    }
+  ]
+}
